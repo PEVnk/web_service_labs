@@ -3,8 +3,8 @@ before_install:
 - chmod +x ./flaskapp/st.sh
 install:
 - pip3 install flask
-73
 - pip3 install gunicorn
+- pip3 install requests
 script:
-- cd flaskapp
+- cd flaskapp 
 - ./st.sh
