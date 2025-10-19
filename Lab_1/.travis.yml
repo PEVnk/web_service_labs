@@ -1,25 +1,5 @@
 language: python
-python:
-  - "3.8"
-  - "3.9"
-  - "3.10"
-
 install:
-  - pip install -r requirements.txt
-  - pip install pytest pytest-cov
-
+- pip3 install flask
 script:
-  - python -c "import flask; print('Flask version:', flask.__version__)"
-  - python -c "import PIL; print('PIL version:', PIL.__version__)"
-  - python -m pytest tests/ -v --cov=.
-
-after_success:
-  - echo "All tests passed successfully!"
-
-deploy:
-  provider: heroku
-  api_key:
-    secure: $HEROKU_API_KEY
-  app: your-image-blender-app
-  on:
-    branch: main
+- python3 ./flaskapp/some_app.py
