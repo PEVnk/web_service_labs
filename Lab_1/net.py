@@ -1,47 +1,61 @@
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
 import base64
 import random
 import string
-from PIL import ImageDraw, ImageFont
 
 def resize_images(image1, image2):
-    """Изменение размера изображений до одинакового"""
+    """Resize images to match dimensions"""
+    # Reset file pointers
+    if hasattr(image1, 'seek'):
+        image1.seek(0)
+    if hasattr(image2, 'seek'):
+        image2.seek(0)
+        
     img1 = Image.open(image1).convert('RGB')
     img2 = Image.open(image2).convert('RGB')
     
-    size1 = img1.size
-    size2 = img2.size
+    # Get dimensions
+    width1, height1 = img1.size
+    width2, height2 = img2.size
     
-    # Используем минимальные размеры
-    new_size = (min(size1[0], size2[0]), min(size1[1], size2[1]))
+    # Use smallest dimensions
+    new_width = min(width1, width2)
+    new_height = min(height1, height2)
     
-    img1_resized = img1.resize(new_size, Image.Resampling.LANCZOS)
-    img2_resized = img2.resize(new_size, Image.Resampling.LANCZOS)
+    # Resize images
+    img1_resized = img1.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    img2_resized = img2.resize((new_width, new_height), Image.Resampling.LANCZOS)
     
     return img1_resized, img2_resized
 
 def blend_images(image1_file, image2_file, blend_level):
-    """Смешивание двух изображений"""
-    image1_file.seek(0)
-    image2_file.seek(0)
+    """Blend two images with given blend level"""
+    # Reset streams
+    if hasattr(image1_file, 'seek'):
+        image1_file.seek(0)
+    if hasattr(image2_file, 'seek'):
+        image2_file.seek(0)
     
+    # Resize images to same dimensions
     image1, image2 = resize_images(image1_file, image2_file)
     
-    # Конвертация в numpy arrays
+    # Convert to numpy arrays
     arr1 = np.array(image1, dtype=np.float32)
     arr2 = np.array(image2, dtype=np.float32)
     
-    # Смешивание
+    # Blend images
     blended_arr = arr1 * blend_level + arr2 * (1 - blend_level)
     blended_arr = np.clip(blended_arr, 0, 255).astype(np.uint8)
     
-    # Обратно в PIL Image
+    # Convert back to PIL Image
     blended_image = Image.fromarray(blended_arr)
     
-    # Конвертация в base64
+    # Convert to base64 for web display
     buffered = io.BytesIO()
     blended_image.save(buffered, format="PNG")
     blended_b64 = base64.b64encode(buffered.getvalue()).decode()
@@ -52,39 +66,48 @@ def blend_images(image1_file, image2_file, blend_level):
     }
 
 def generate_color_histograms(image1_file, image2_file, blended_image):
-    """Генерация RGB гистограмм"""
+    """Generate RGB color distribution histograms"""
     def create_histogram(image, title):
-        plt.figure(figsize=(8, 3))
+        plt.figure(figsize=(10, 4))
         
         if isinstance(image, Image.Image):
             arr = np.array(image)
         else:
-            image.seek(0)
+            if hasattr(image, 'seek'):
+                image.seek(0)
             arr = np.array(Image.open(image).convert('RGB'))
         
+        # Plot RGB histograms
         colors = ['red', 'green', 'blue']
-        for i, color in enumerate(colors):
-            plt.hist(arr[:,:,i].ravel(), bins=50, color=color, alpha=0.7, 
-                    label=color.upper(), density=True)
+        color_labels = ['Red', 'Green', 'Blue']
         
-        plt.title(title)
-        plt.xlabel('Pixel Value')
-        plt.ylabel('Density')
+        for i, (color, label) in enumerate(zip(colors, color_labels)):
+            plt.hist(arr[:,:,i].ravel(), bins=64, color=color, alpha=0.7, 
+                    label=label, density=True, histtype='stepfilled')
+        
+        plt.title(title, fontsize=14, fontweight='bold')
+        plt.xlabel('Pixel Intensity', fontsize=12)
+        plt.ylabel('Density', fontsize=12)
         plt.legend()
+        plt.grid(True, alpha=0.3)
         plt.tight_layout()
         
-        # Конвертация в base64
+        # Convert to base64
         buf = io.BytesIO()
-        plt.savefig(buf, format='PNG', dpi=80)
+        plt.savefig(buf, format='PNG', dpi=100, bbox_inches='tight')
         buf.seek(0)
         img_b64 = base64.b64encode(buf.getvalue()).decode()
         plt.close()
         
         return img_b64
     
-    image1_file.seek(0)
-    image2_file.seek(0)
+    # Reset streams
+    if hasattr(image1_file, 'seek'):
+        image1_file.seek(0)
+    if hasattr(image2_file, 'seek'):
+        image2_file.seek(0)
     
+    # Create histograms
     histogram1 = create_histogram(image1_file, 'Image 1 - Color Distribution')
     histogram2 = create_histogram(image2_file, 'Image 2 - Color Distribution')
     histogram_blended = create_histogram(blended_image, 'Blended Image - Color Distribution')
@@ -96,43 +119,65 @@ def generate_color_histograms(image1_file, image2_file, blended_image):
     }
 
 def generate_captcha(length=6):
-    """Генерация CAPTCHA"""
-    # Создание изображения
+    """Generate random CAPTCHA text and image"""
+    # Image dimensions
     width, height = 200, 80
-    image = Image.new('RGB', (width, height), 'white')
+    
+    # Create image with light background
+    image = Image.new('RGB', (width, height), color=(240, 240, 240))
     draw = ImageDraw.Draw(image)
     
-    # Генерация текста
-    text = ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+    # Generate random text
+    characters = string.ascii_uppercase + string.digits
+    text = ''.join(random.choice(characters) for _ in range(length))
     
-    # Попытка использования шрифта
+    # Try to load font
     try:
         font = ImageFont.truetype("arial.ttf", 36)
     except:
-        font = ImageFont.load_default()
+        try:
+            font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 36)
+        except:
+            font = ImageFont.load_default()
     
-    # Добавление шума
-    for _ in range(5):
-        x1, y1 = random.randint(0, width), random.randint(0, height)
-        x2, y2 = random.randint(0, width), random.randint(0, height)
-        draw.line([(x1, y1), (x2, y2)], fill='gray', width=1)
+    # Add noise - random lines
+    for _ in range(6):
+        x1 = random.randint(0, width)
+        y1 = random.randint(0, height)
+        x2 = random.randint(0, width)
+        y2 = random.randint(0, height)
+        draw.line([(x1, y1), (x2, y2)], fill=(180, 180, 180), width=1)
     
-    # Рисование текста
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_width = bbox[2] - bbox[0]
-    text_height = bbox[3] - bbox[1]
+    # Add noise - random dots
+    for _ in range(100):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        draw.point((x, y), fill=(200, 200, 200))
+    
+    # Calculate text position
+    try:
+        bbox = draw.textbbox((0, 0), text, font=font)
+        text_width = bbox[2] - bbox[0]
+        text_height = bbox[3] - bbox[1]
+    except:
+        text_width = len(text) * 20
+        text_height = 36
     
     x = (width - text_width) / 2
     y = (height - text_height) / 2
     
+    # Draw text with distortion
     for i, char in enumerate(text):
         char_x = x + i * (text_width / len(text))
-        offset_x = random.randint(-3, 3)
-        offset_y = random.randint(-3, 3)
-        draw.text((char_x + offset_x, y + offset_y), char, fill='black', font=font)
+        offset_x = random.randint(-2, 2)
+        offset_y = random.randint(-2, 2)
+        draw.text((char_x + offset_x, y + offset_y), char, 
+                 fill=(0, 0, 0), font=font)
     
     return text, image
 
 def verify_captcha(user_input, captcha_text):
-    """Проверка CAPTCHA"""
+    """Verify CAPTCHA input (case insensitive)"""
+    if not user_input or not captcha_text:
+        return False
     return user_input.upper() == captcha_text.upper()
