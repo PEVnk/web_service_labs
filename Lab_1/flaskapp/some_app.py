@@ -8,7 +8,7 @@ app = Flask(__name__)
 def hello():
     return "<html><head></head><body>Hello World!</body></html>"
 
-#наша новая функция сайта
+# наша новая функция сайта
 @app.route("/data_to")
 def data_to():
     # создаем переменные с данными для передачи в шаблон
