@@ -6,7 +6,7 @@ from flask import Flask, render_template
 # декоратор для вывода страницы по умолчанию
 #@app.route("/")
 #def hello():
-    return "<html><head></head><body>Hello World!</body></html>"
+    #return "<html><head></head><body>Hello World!</body></html>"
 
 # наша новая функция сайта
 @app.route("/data_to")
