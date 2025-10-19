@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Blender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Image Blender with Histograms</h1>
+        
+        <form id="blendForm" enctype="multipart/form-data">
+            <div class="upload-section">
+                <div class="form-group">
+                    <label for="image1">First Image:</label>
+                    <input type="file" id="image1" name="image1" accept="image/*" required>
+                    <div class="preview-container">
+                        <img id="preview1" class="preview-image hidden">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="image2">Second Image:</label>
+                    <input type="file" id="image2" name="image2" accept="image/*" required>
+                    <div class="preview-container">
+                        <img id="preview2" class="preview-image hidden">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="blendLevel">Blend Level (0 = Image2, 1 = Image1):</label>
+                <div class="slider-container">
+                    <input type="range" id="blendLevel" name="blend_level" min="0" max="1" step="0.1" value="0.5">
+                    <span id="blendValue">0.5</span>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>CAPTCHA Verification:</label>
+                <div class="captcha-container">
+                    <img id="captchaImage" src="data:image/png;base64,{{ captcha_image }}" alt="CAPTCHA">
+                    <button type="button" id="refreshCaptcha">Refresh</button>
+                </div>
+                <input type="text" id="captchaInput" name="captcha" placeholder="Enter CAPTCHA text" required>
+            </div>
+            
+            <button type="submit">Blend Images</button>
+        </form>
+        
+        <div id="loading" class="loading hidden">
+            <p>Processing images and generating histograms...</p>
+        </div>
+        
+        <div id="results" class="results hidden">
+            <h2>Blending Results</h2>
+            
+            <div class="image-comparison">
+                <div class="image-box">
+                    <h3>Image 1</h3>
+                    <img id="result1" class="result-image">
+                </div>
+                <div class="image-box">
+                    <h3>Blended Result</h3>
+                    <img id="blendedResult" class="result-image">
+                </div>
+                <div class="image-box">
+                    <h3>Image 2</h3>
+                    <img id="result2" class="result-image">
+                </div>
+            </div>
+            
+            <div class="histograms-section">
+                <h3>Color Distribution Analysis</h3>
+                <div class="histograms-grid">
+                    <div class="histogram-box">
+                        <h4>Image 1 Histogram</h4>
+                        <img id="histogram1" class="histogram-image">
+                    </div>
+                    <div class="histogram-box">
+                        <h4>Image 2 Histogram</h4>
+                        <img id="histogram2" class="histogram-image">
+                    </div>
+                    <div class="histogram-box">
+                        <h4>Blended Image Histogram</h4>
+                        <img id="histogramBlended" class="histogram-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="error" class="error hidden"></div>
+        
+        <p><a href="/">Back to Simple Version</a></p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
