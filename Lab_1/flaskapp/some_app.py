@@ -1,12 +1,12 @@
-#print("Hello world")
+print("Hello world")
 from flask import Flask, render_template
 
-#app = Flask(__name__)
+app = Flask(__name__)
 
 # декоратор для вывода страницы по умолчанию
-#@app.route("/")
-#def hello():
-    #return "<html><head></head><body>Hello World!</body></html>"
+@app.route("/")
+def hello():
+    return "<html><head></head><body>Hello World!</body></html>"
 
 # наша новая функция сайта
 @app.route("/data_to")
