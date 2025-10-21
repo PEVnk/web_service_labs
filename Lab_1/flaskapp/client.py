@@ -16,4 +16,3 @@ jsondata = {'imagebin':b64.decode('utf-8')}
 res = requests.post('http://localhost:5000/apinet', json=jsondata)
 if res.ok:
   print(res.json())
-
