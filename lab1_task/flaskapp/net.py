@@ -1,31 +1,25 @@
 import cv2
 import numpy as np
 
-def advanced_denoising(image, method='deep_learning_simulated'):
+def advanced_blending(image1, image2, alpha, method='linear'):
     """
-    Продвинутые методы устранения шума (симуляция нейросетевых подходов)
+    Продвинутые методы смешивания изображений
     """
-    if method == 'deep_learning_simulated':
-        # Симуляция нейросетевого подхода с помощью комбинации фильтров
-        denoised = cv2.fastNlMeansDenoisingColored(image, None, 10, 10, 7, 21)
-        denoised = cv2.bilateralFilter(denoised, 9, 75, 75)
-        return denoised
+    h1, w1 = image1.shape[:2]
+    h2, w2 = image2.shape[:2]
+    h = min(h1, h2)
+    w = min(w1, w2)
     
-    elif method == 'wavelet_simulated':
-        # Симуляция вейвлет-преобразования
-        denoised = cv2.medianBlur(image, 5)
-        denoised = cv2.GaussianBlur(denoised, (3, 3), 0)
-        return denoised
+    img1_resized = cv2.resize(image1, (w, h))
+    img2_resized = cv2.resize(image2, (w, h))
     
-    return image
-
-def add_test_noise(image, noise_level=25):
-    """
-    Добавляет тестовый шум для демонстрации
-    """
-    row, col, ch = image.shape
-    mean = 0
-    sigma = noise_level
-    gauss = np.random.normal(mean, sigma, (row, col, ch))
-    noisy = image + gauss
-    return np.clip(noisy, 0, 255).astype(np.uint8)
+    if method == 'linear':
+        return cv2.addWeighted(img1_resized, alpha, img2_resized, 1 - alpha, 0)
+    elif method == 'multiply':
+        blended = img1_resized.astype(np.float32) * img2_resized.astype(np.float32) / 255.0
+        return cv2.addWeighted(img1_resized, alpha, blended.astype(np.uint8), 1 - alpha, 0)
+    elif method == 'screen':
+        blended = 255 - (255 - img1_resized.astype(np.float32)) * (255 - img2_resized.astype(np.float32)) / 255.0
+        return cv2.addWeighted(img1_resized, alpha, blended.astype(np.uint8), 1 - alpha, 0)
+    
+    return img1_resized
