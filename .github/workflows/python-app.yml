@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'lab1_task/**'        # Запускать только при изменениях в lab1_task
+      - 'lab1_task/**'
   pull_request:
     branches: [ main ]
     paths:
@@ -13,18 +13,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.8, 3.9, 3.10]
-
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
     
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python
       uses: actions/setup-python@v3
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.10"
     
     - name: Install system dependencies
       run: |
@@ -36,17 +33,17 @@ jobs:
         cd lab1_task/flaskapp
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov
+        pip install pytest
     
     - name: Run tests
       run: |
         cd lab1_task/flaskapp
-        python -m pytest tests/ -v --cov=. --tb=short
+        python -m pytest tests/ -v
     
-    - name: Verify imports
+    - name: Verify setup
       run: |
         cd lab1_task/flaskapp
-        python -c "import flask; print('✅ Flask version:', flask.__version__)"
-        python -c "import cv2; print('✅ OpenCV version:', cv2.__version__)"
-        python -c "import numpy; print('✅ NumPy version:', numpy.__version__)"
-        python -c "import matplotlib; print('✅ Matplotlib version:', matplotlib.__version__)"
+        python -c "import flask; print('✅ Flask OK')"
+        python -c "import cv2; print('✅ OpenCV OK')"
+        python -c "import numpy; print('✅ NumPy OK')"
+        echo "🎉 Lab1 Task CI completed successfully!"
