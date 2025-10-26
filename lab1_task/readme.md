@@ -15,3 +15,5 @@ A web application for blending two images with adjustable alpha channel and CAPT
 git clone https://github.com/PEVnk/web_service_labs.git
 cd web_service_labs/flaskapp
 ./st.sh
+ 
+# Last updated: Mon Oct 27 00:30:19 +07 2025
