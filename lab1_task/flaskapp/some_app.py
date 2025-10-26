@@ -11,9 +11,6 @@ import base64
 import requests
 import random
 
-# Переопределяем verify_recaptcha для тестовой среды
-original_verify_recaptcha = None
-
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -23,7 +20,12 @@ app.secret_key = 'your-secret-key-here'
 RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
 
-# В тестовой среде пропускаем проверку для тестовых значений
+def verify_recaptcha(recaptcha_response):
+    """
+    Проверяет Google reCAPTCHA ответ
+    В тестовой среде пропускает проверку для тестовых значений
+    """
+    # В тестовой среде пропускаем проверку для тестовых значений
     if os.environ.get('PYTEST_CURRENT_TEST') or recaptcha_response == 'test-bypass':
         return True
         
@@ -193,9 +195,6 @@ def blend_images_route():
             'success': False,
             'error': f'Error processing images: {str(e)}'
         }), 500
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
