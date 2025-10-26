@@ -31,16 +31,41 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
     
-    - name: Run tests
+    - name: Debug info
       run: |
         cd lab1_task/flaskapp
-        python -m pytest tests/ -v
+        echo "=== Project Structure ==="
+        ls -la
+        echo "=== Tests Structure ==="
+        ls -la tests/ || echo "No tests directory"
+        echo "=== Python Path ==="
+        python -c "import sys; print('\\n'.join(sys.path))"
     
-    - name: Verify setup
+    - name: Run tests with verbose output
       run: |
         cd lab1_task/flaskapp
-        python -c "import flask; print('✅ Flask OK')"
-        python -c "import cv2; print('✅ OpenCV OK')" 
-        python -c "import numpy; print('✅ NumPy OK')"
-        python -c "import matplotlib; print('✅ Matplotlib OK')"
-        echo "🎉 Lab1 CI completed successfully!"
+        python -m pytest tests/ -v -s --tb=short
+    
+    - name: Verify basic functionality
+      run: |
+        cd lab1_task/flaskapp
+        python -c "
+import sys
+sys.path.insert(0, '.')
+try:
+    from some_app import app, blend_images
+    print('✅ Main imports successful')
+    
+    # Test basic function
+    import numpy as np
+    img1 = np.ones((10, 10, 3), dtype=np.uint8) * 255
+    img2 = np.zeros((10, 10, 3), dtype=np.uint8)
+    result = blend_images(img1, img2, 0.5)
+    print('✅ Basic functionality test passed')
+    
+except Exception as e:
+    print(f'❌ Error: {e}')
+    import traceback
+    traceback.print_exc()
+    exit(1)
+        "
