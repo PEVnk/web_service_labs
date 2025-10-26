@@ -112,14 +112,16 @@ def advanced():
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
-    # Отладочная информация
-    print(f"reCAPTCHA response received: {bool(request.form.get('g-recaptcha-response'))}")
+    # === ОТЛАДОЧНАЯ ИНФОРМАЦИЯ ===
+    print("=== DEBUG ===")
+    print(f"Form keys: {list(request.form.keys())}")
+    print(f"Files keys: {list(request.files.keys())}")
+    print(f"reCAPTCHA response present: {'g-recaptcha-response' in request.form}")
     
     recaptcha_response = request.form.get('g-recaptcha-response')
+    print(f"reCAPTCHA response length: {len(recaptcha_response) if recaptcha_response else 0}")
     
     # === ПРОВЕРКА reCAPTCHA ===
-    recaptcha_response = request.form.get('g-recaptcha-response')
-    
     if not recaptcha_response:
         return jsonify({
             'success': False,
@@ -131,6 +133,8 @@ def blend_images_route():
             'success': False,
             'error': 'reCAPTCHA verification failed. Please try again.'
         }), 400
+    
+    print("✅ reCAPTCHA passed, processing images...")
         
     # Проверяем файлы
     if 'file1' not in request.files or 'file2' not in request.files:
