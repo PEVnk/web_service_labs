@@ -17,28 +17,28 @@ app.secret_key = 'your-secret-key-here'
 #RECAPTCHA_SECRET_KEY = '6LfGz_crAAAAAJ5mt6R7loNfaw9BUdllgpaAKxJC'  
 #RECAPTCHA_SITE_KEY = '6LfGz_crAAAAANTE_nHwuDF5NLIHNJ0wJHlVZqbH'  
 
-RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'  
-RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+#RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'  
+#RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 
-def verify_recaptcha(recaptcha_response):
-    """
-    Проверяет Google reCAPTCHA ответ
-    """
-    data = {
-        'secret': RECAPTCHA_SECRET_KEY,
-        'response': recaptcha_response
-    }
+#def verify_recaptcha(recaptcha_response):
     
-    try:
+    #Проверяет Google reCAPTCHA ответ
+    
+    #data = {
+        #'secret': RECAPTCHA_SECRET_KEY,
+        #'response': recaptcha_response
+    #}
+    
+   # try:
         response = requests.post(
-            'https://www.google.com/recaptcha/api/siteverify',
-            data=data,
-            timeout=10
-        )
-        result = response.json()
-        return result.get('success', False)
-    except requests.RequestException:
-        return False
+            #'https://www.google.com/recaptcha/api/siteverify',
+           # data=data,
+           # timeout=10
+       # )
+      #  result = response.json()
+       # return result.get('success', False)
+    #except requests.RequestException:
+       # return False
 
 def blend_images(image1, image2, alpha):
     """
@@ -101,20 +101,20 @@ def advanced():
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
-    """# Отладочная информация
-    print("=== DEBUG INFO ===")
-    print("Form data:", request.form)
-    print("Files:", request.files)
-    print("reCAPTCHA response:", request.form.get('g-recaptcha-response'))
-    print("==================")
+    # Отладочная информация
+    #print("=== DEBUG INFO ===")
+    #print("Form data:", request.form)
+    #print("Files:", request.files)
+    #print("reCAPTCHA response:", request.form.get('g-recaptcha-response'))
+    #print("==================")
     
     # Временная проверка
-    recaptcha_response = request.form.get('g-recaptcha-response')
-    if not recaptcha_response:
-        return jsonify({
-            'success': False,
-            'error': 'reCAPTCHA not received. Please complete the verification.'
-        }), 400
+    #recaptcha_response = request.form.get('g-recaptcha-response')
+    #if not recaptcha_response:
+        #return jsonify({
+            #'success': False,
+            #'error': 'reCAPTCHA not received. Please complete the verification.'
+       # }), 400
     
     # Пропускаем проверку с Google для тестирования
     # if not verify_recaptcha(recaptcha_response):
