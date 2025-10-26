@@ -30,7 +30,7 @@ app.secret_key = 'your-secret-key-here'
     #}
     
    # try:
-        response = requests.post(
+        #response = requests.post(
             #'https://www.google.com/recaptcha/api/siteverify',
            # data=data,
            # timeout=10
