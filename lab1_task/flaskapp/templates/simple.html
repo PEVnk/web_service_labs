@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Blending App with Google reCAPTCHA</title>
-    <!-- УДАЛИТЕ ЭТУ СТРОКУ -->
-<!-- <script src="https://www.google.com/recaptcha/api.js" async defer></script> -->
+   
     <style>
         * {
             margin: 0;
@@ -144,25 +143,7 @@
             text-align: center;
         }
         
-        .recaptcha-section {
-            background: #e8f4fc;
-            padding: 25px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            text-align: center;
-            border: 2px solid #3498db;
-        }
-        
-        .recaptcha-section h3 {
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-        
-        .g-recaptcha {
-            display: inline-block;
-            margin: 10px 0;
-        }
-        
+                
         .submit-btn {
             background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
             color: white;
@@ -339,14 +320,7 @@
                     </p>
                 </div>
                 
-                <!-- ЗАКОММЕНТИРУЙТЕ ЭТУ СЕКЦИЮ -->
-<!--
-<div class="recaptcha-section">
-    <h3>🔒 Security Verification</h3>
-    <p>Please verify that you're not a robot</p>
-    <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
-</div>
--->
+               
                 
                 <button class="submit-btn" id="processBtn" onclick="processImages()" disabled>
                     🎨 Blend Images
@@ -457,12 +431,7 @@
             const file1 = fileInput1.files[0];
             const file2 = fileInput2.files[0];
             const alpha = blendAlpha.value;
-           // УБЕРИТЕ ЭТУ ПРОВЕРКУ
-    // const recaptchaResponse = grecaptcha.getResponse();
-    // if (!recaptchaResponse) {
-    //     showError('Please complete the reCAPTCHA verification.');
-    //     return;
-    // }
+          
 
             // Показываем загрузку
             loading.style.display = 'block';
@@ -475,8 +444,7 @@
             formData.append('file1', file1);
             formData.append('file2', file2);
             formData.append('blend_alpha', alpha);
-           // УБЕРИТЕ ЭТУ СТРОКУ
-    // formData.append('g-recaptcha-response', recaptchaResponse);
+           
 
             try {
                 const response = await fetch('/blend', {
@@ -491,12 +459,11 @@
                     displayResults(data);
                 } else {
                     showError(data.error || 'An error occurred while processing images.');
-                    // Сбрасываем reCAPTCHA
-                   // grecaptcha.reset();
+                    
                 }
             } catch (error) {
                 showError('Network error: ' + error.message);
-                //grecaptcha.reset();
+               
             } finally {
                 loading.style.display = 'none';
                 processBtn.disabled = false;
