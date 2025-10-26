@@ -2,9 +2,8 @@ import pytest
 import sys
 import os
 import numpy as np
-from io import BytesIO
 
-# Добавляем путь к корневой директории проекта
+# Обновите путь импорта
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from some_app import app, blend_images, generate_color_distribution
