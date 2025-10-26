@@ -14,8 +14,11 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.secret_key = 'your-secret-key-here'
 
 # Конфигурация Google reCAPTCHA
-RECAPTCHA_SECRET_KEY = '6LfGz_crAAAAAJ5mt6R7loNfaw9BUdllgpaAKxJC'  
-RECAPTCHA_SITE_KEY = '6LfGz_crAAAAANTE_nHwuDF5NLIHNJ0wJHlVZqbH'      
+#RECAPTCHA_SECRET_KEY = '6LfGz_crAAAAAJ5mt6R7loNfaw9BUdllgpaAKxJC'  
+#RECAPTCHA_SITE_KEY = '6LfGz_crAAAAANTE_nHwuDF5NLIHNJ0wJHlVZqbH'  
+
+RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'  
+RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 
 def verify_recaptcha(recaptcha_response):
     """
