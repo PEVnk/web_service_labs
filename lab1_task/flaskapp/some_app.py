@@ -101,7 +101,7 @@ def advanced():
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
-    # Отладочная информация
+    """# Отладочная информация
     print("=== DEBUG INFO ===")
     print("Form data:", request.form)
     print("Files:", request.files)
@@ -121,7 +121,7 @@ def blend_images_route():
     #     return jsonify({
     #         'success': False,
     #         'error': 'reCAPTCHA verification failed.'
-    #     }), 400
+    #     }), 400"""
     
     # Проверяем файлы
     if 'file1' not in request.files or 'file2' not in request.files:
