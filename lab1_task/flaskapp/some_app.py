@@ -20,9 +20,10 @@ RECAPTCHA_SITE_KEY = '6LfGz_crAAAAANTE_nHwuDF5NLIHNJ0wJHlVZqbH'
 
 def verify_recaptcha(recaptcha_response):
     """
-    Проверяет Google reCAPTCHA ответ
+    Проверяет Google reCAPTCHA ответ с отладкой
     """
     if not recaptcha_response:
+        print("❌ reCAPTCHA: No response received")
         return False
         
     data = {
@@ -31,15 +32,23 @@ def verify_recaptcha(recaptcha_response):
     }
     
     try:
+        print(f"🔍 reCAPTCHA: Sending verification request...")
         response = requests.post(
             'https://www.google.com/recaptcha/api/siteverify',
             data=data,
             timeout=10
         )
         result = response.json()
-        return result.get('success', False)
+        print(f"🔍 reCAPTCHA Response: {result}")
+        
+        success = result.get('success', False)
+        if not success:
+            print(f"❌ reCAPTCHA failed. Errors: {result.get('error-codes', [])}")
+        
+        return success
+        
     except requests.RequestException as e:
-        print(f"reCAPTCHA verification error: {e}")
+        print(f"❌ reCAPTCHA network error: {e}")
         return False
 
 def blend_images(image1, image2, alpha):
