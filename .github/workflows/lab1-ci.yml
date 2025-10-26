@@ -1,0 +1,46 @@
+name: Lab1 CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1-mesa-glx libgtk2.0-0 libsm6 libxext6 libxrender-dev
+    
+    - name: Install Python dependencies
+      run: |
+        cd lab1_task/flaskapp
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest
+    
+    - name: Run tests
+      run: |
+        cd lab1_task/flaskapp
+        python -m pytest tests/ -v
+    
+    - name: Verify setup
+      run: |
+        cd lab1_task/flaskapp
+        python -c "import flask; print('✅ Flask OK')"
+        python -c "import cv2; print('✅ OpenCV OK')" 
+        python -c "import numpy; print('✅ NumPy OK')"
+        python -c "import matplotlib; print('✅ Matplotlib OK')"
+        echo "🎉 Lab1 CI completed successfully!"
