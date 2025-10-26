@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Blending App with Google reCAPTCHA</title>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+   
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .upload-box {
+            border: 3px dashed #3498db;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            position: relative;
+        }
+        
+        .upload-box:hover {
+            border-color: #2980b9;
+            background: #e8f4fc;
+        }
+        
+        .upload-box h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .file-name {
+            margin-top: 10px;
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1.1em;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        .blend-value {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 1.2em;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+                
+        .submit-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 30px;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 40px;
+        }
+        
+        .images-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .image-container {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .image-container h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+        
+        .image-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 25px;
+        }
+        
+        .chart-container {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .chart-container h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.2em;
+        }
+        
+        .chart-container img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+        
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+            font-size: 1.1em;
+        }
+        
+        .success {
+            background: #27ae60;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: none;
+            font-size: 1.1em;
+        }
+        
+        .blend-info {
+            background: #3498db;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+         .recaptcha-section {
+            background: #e8f4fc;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            text-align: center;
+            border: 2px solid #3498db;
+        }
+        
+        .recaptcha-section h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .g-recaptcha {
+            display: inline-block;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 Image Blending Studio</h1>
+            <p>Mix two images with custom blending levels and analyze color distributions</p>
+        </div>
+        
+        <div class="content">
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox1">
+                    <h3>📸 Upload First Image</h3>
+                    <p>Click to select image</p>
+                    <input type="file" id="fileInput1" accept="image/*" class="file-input">
+                    <p id="fileName1" class="file-name">No file selected</p>
+                </div>
+                
+                <div class="upload-box" id="uploadBox2">
+                    <h3>📸 Upload Second Image</h3>
+                    <p>Click to select image</p>
+                    <input type="file" id="fileInput2" accept="image/*" class="file-input">
+                    <p id="fileName2" class="file-name">No file selected</p>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="blendAlpha">Blending Level: <span id="blendValue">0.5</span></label>
+                    <div class="slider-container">
+                        <span>Image 1</span>
+                        <input type="range" id="blendAlpha" min="0" max="1" step="0.01" value="0.5">
+                        <span>Image 2</span>
+                        <div class="blend-value" id="blendDisplay">0.5</div>
+                    </div>
+                    <p style="text-align: center; margin-top: 10px; color: #7f8c8d;">
+                        Adjust the slider to control the blending ratio between the two images
+                    </p>
+                </div>
+                
+               <div class="recaptcha-section">
+                   <h3>🔒 Security Verification</h3>
+                   <p>Please verify that you're not a robot</p>
+                   <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                
+                </div>
+                
+                <button class="submit-btn" id="processBtn" onclick="processImages()">
+                    🎨 Blend Images
+                </button>
+            </div>
+                
+                <button class="submit-btn" id="processBtn" onclick="processImages()" disabled>
+                    🎨 Blend Images
+                </button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processing your images... This may take a few seconds.</p>
+            </div>
+
+            <div class="error" id="errorMessage"></div>
+            <div class="success" id="successMessage"></div>
+
+            <div class="results" id="results">
+                <div class="blend-info" id="blendInfo">
+                    Blending completed with ratio: <strong id="finalBlendRatio">0.5</strong>
+                </div>
+                
+                <h2 style="text-align: center; margin-bottom: 30px; color: #2c3e50;">Results</h2>
+                
+                <div class="images-grid">
+                    <div class="image-container">
+                        <h3>Original Image 1</h3>
+                        <img id="originalImage1" src="" alt="Original Image 1">
+                    </div>
+                    <div class="image-container">
+                        <h3>Blended Result</h3>
+                        <img id="blendedImage" src="" alt="Blended Image">
+                    </div>
+                    <div class="image-container">
+                        <h3>Original Image 2</h3>
+                        <img id="originalImage2" src="" alt="Original Image 2">
+                    </div>
+                </div>
+                
+                <h2 style="text-align: center; margin: 40px 0 30px; color: #2c3e50;">Color Distribution Analysis</h2>
+                
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Image 1 Colors</h3>
+                        <img id="colorChart1" src="" alt="Color Distribution 1">
+                    </div>
+                    <div class="chart-container">
+                        <h3>Blended Image Colors</h3>
+                        <img id="colorChartBlended" src="" alt="Blended Color Distribution">
+                    </div>
+                    <div class="chart-container">
+                        <h3>Image 2 Colors</h3>
+                        <img id="colorChart2" src="" alt="Color Distribution 2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Элементы DOM
+        const fileInput1 = document.getElementById('fileInput1');
+        const fileInput2 = document.getElementById('fileInput2');
+        const fileName1 = document.getElementById('fileName1');
+        const fileName2 = document.getElementById('fileName2');
+        const blendAlpha = document.getElementById('blendAlpha');
+        const blendValue = document.getElementById('blendValue');
+        const blendDisplay = document.getElementById('blendDisplay');
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const finalBlendRatio = document.getElementById('finalBlendRatio');
+        const blendInfo = document.getElementById('blendInfo');
+
+        // Обновление отображения значения смешивания
+        blendAlpha.addEventListener('input', function() {
+            const value = parseFloat(this.value).toFixed(2);
+            blendValue.textContent = value;
+            blendDisplay.textContent = value;
+        });
+
+        // Обработчики для файловых input'ов
+        fileInput1.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName1.textContent = this.files[0].name;
+            } else {
+                fileName1.textContent = 'No file selected';
+            }
+            updateProcessButton();
+        });
+
+        fileInput2.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                fileName2.textContent = this.files[0].name;
+            } else {
+                fileName2.textContent = 'No file selected';
+            }
+            updateProcessButton();
+        });
+
+        // Обновление состояния кнопки
+        function updateProcessButton() {
+            const hasFiles = fileInput1.files.length > 0 && fileInput2.files.length > 0;
+            processBtn.disabled = !hasFiles;
+        }
+
+        // Основная функция обработки
+        async function processImages() {
+            const file1 = fileInput1.files[0];
+            const file2 = fileInput2.files[0];
+            const alpha = blendAlpha.value;
+
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                showError('Please complete the reCAPTCHA verification.');
+                return;
+            }
+          
+
+            // Показываем загрузку
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            processBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file1', file1);
+            formData.append('file2', file2);
+            formData.append('blend_alpha', alpha);
+            formData.append('g-recaptcha-response', recaptchaResponse);
+           
+
+            try {
+                const response = await fetch('/blend', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+               if (response.ok && data.success) {
+                    showSuccess('Images blended successfully!');
+                    displayResults(data);
+                    // Сбрасываем reCAPTCHA после успешной отправки
+                    grecaptcha.reset();
+                } else {
+                    showError(data.error || 'An error occurred while processing images.');
+                    // Сбрасываем reCAPTCHA при ошибке
+                    grecaptcha.reset();
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+                grecaptcha.reset();
+               
+            } finally {
+                loading.style.display = 'none';
+                processBtn.disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            // Устанавливаем изображения
+            document.getElementById('originalImage1').src = data.images.original1;
+            document.getElementById('originalImage2').src = data.images.original2;
+            document.getElementById('blendedImage').src = data.images.blended;
+
+            // Устанавливаем графики
+            document.getElementById('colorChart1').src = data.charts.color_dist1;
+            document.getElementById('colorChart2').src = data.charts.color_dist2;
+            document.getElementById('colorChartBlended').src = data.charts.color_dist_blended;
+
+            // Обновляем информацию о смешивании
+            finalBlendRatio.textContent = data.blend_alpha.toFixed(2);
+            blendInfo.style.display = 'block';
+
+            // Показываем результаты
+            results.style.display = 'block';
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Инициализация
+        updateProcessButton();
+    </script>
+</body>
+</html>
