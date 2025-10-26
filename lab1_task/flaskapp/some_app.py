@@ -103,6 +103,11 @@ def advanced():
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
+    # Отладочная информация
+    print(f"reCAPTCHA response received: {bool(request.form.get('g-recaptcha-response'))}")
+    
+    recaptcha_response = request.form.get('g-recaptcha-response')
+    
     # === ПРОВЕРКА reCAPTCHA ===
     recaptcha_response = request.form.get('g-recaptcha-response')
     
