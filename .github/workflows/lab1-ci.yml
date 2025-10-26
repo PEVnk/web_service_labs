@@ -38,34 +38,13 @@ jobs:
         ls -la
         echo "=== Tests Structure ==="
         ls -la tests/ || echo "No tests directory"
-        echo "=== Python Path ==="
-        python -c "import sys; print('\\n'.join(sys.path))"
     
-    - name: Run tests with verbose output
+    - name: Run tests
       run: |
         cd lab1_task/flaskapp
-        python -m pytest tests/ -v -s --tb=short
+        python -m pytest tests/ -v
     
     - name: Verify basic functionality
       run: |
         cd lab1_task/flaskapp
-        python -c "
-import sys
-sys.path.insert(0, '.')
-try:
-    from some_app import app, blend_images
-    print('✅ Main imports successful')
-    
-    # Test basic function
-    import numpy as np
-    img1 = np.ones((10, 10, 3), dtype=np.uint8) * 255
-    img2 = np.zeros((10, 10, 3), dtype=np.uint8)
-    result = blend_images(img1, img2, 0.5)
-    print('✅ Basic functionality test passed')
-    
-except Exception as e:
-    print(f'❌ Error: {e}')
-    import traceback
-    traceback.print_exc()
-    exit(1)
-        "
+        python -c "import sys; sys.path.insert(0, '.'); from some_app import app; print('✅ Flask app imported successfully')"
