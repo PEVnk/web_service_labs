@@ -1,8 +1,18 @@
-РАЗРАБОТКА ВЕБ-ПРИЛОЖЕНИЯ НА PYTHON
+# Flask Image Blending App
 
-вариант 4
-# Flask Image Blender
+[![Build Status](https://travis-ci.com/PEVnk/web_service_labs.svg?branch=main)](https://travis-ci.com/PEVnk/web_service_labs)
 
-[![Build Status](https://travis-ci.com/your-username/your-repo.svg?branch=main)](https://travis-ci.com/your-username/your-repo)
+Web application for image blending with CAPTCHA protection and color distribution analysis.
 
-Web application for image blending with CAPTCHA protection.
+## Features
+- Image blending with adjustable alpha (0.0 - 1.0)
+- Google reCAPTCHA integration
+- Color distribution visualization
+- Responsive web interface
+
+## Installation
+```bash
+git clone https://github.com/PEVnk/web_service_labs.git
+cd web_service_labs/flaskapp
+chmod +x st.sh
+./st.sh
