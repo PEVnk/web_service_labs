@@ -93,11 +93,13 @@ def generate_color_distribution(image, title="Color Distribution"):
 
 @app.route('/')
 def index():
-    return render_template('simple.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+    return render_template('simple.html') 
+    #, recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
 @app.route('/advanced')
 def advanced():
-    return render_template('net.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+    return render_template('net.html')
+    #, recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
