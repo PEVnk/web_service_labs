@@ -1,29 +1,27 @@
+import matplotlib
+matplotlib.use('Agg')  # Используем бэкенд без GUI
+import matplotlib.pyplot as plt
+
 from flask import Flask, render_template, request, jsonify, session
 import cv2
 import numpy as np
 import os
 from io import BytesIO
 import base64
-import matplotlib.pyplot as plt
 import requests
-import json
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.secret_key = 'your-secret-key-here'
 
-#Конфигурация Google reCAPTCHA
-RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'  
-RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'  
-
+# Google reCAPTCHA тестовые ключи
+RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
+RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
 
 def verify_recaptcha(recaptcha_response):
-    """
-    Проверяет Google reCAPTCHA ответ с отладкой
-    """
+    """Проверяет Google reCAPTCHA ответ"""
     if not recaptcha_response:
-        print("❌ reCAPTCHA: No response received")
         return False
         
     data = {
@@ -32,58 +30,41 @@ def verify_recaptcha(recaptcha_response):
     }
     
     try:
-        print(f"🔍 reCAPTCHA: Sending verification request...")
         response = requests.post(
             'https://www.google.com/recaptcha/api/siteverify',
             data=data,
             timeout=10
         )
         result = response.json()
-        print(f"🔍 reCAPTCHA Response: {result}")
-        
-        success = result.get('success', False)
-        if not success:
-            print(f"❌ reCAPTCHA failed. Errors: {result.get('error-codes', [])}")
-        
-        return success
-        
-    except requests.RequestException as e:
-        print(f"❌ reCAPTCHA network error: {e}")
+        return result.get('success', False)
+    except requests.RequestException:
         return False
 
 def blend_images(image1, image2, alpha):
-    """
-    Смешивает два изображения с заданным коэффициентом
-    """
-    # Приводим изображения к одному размеру
+    """Смешивает два изображения с заданным коэффициентом"""
     h1, w1 = image1.shape[:2]
     h2, w2 = image2.shape[:2]
     
-    # Используем минимальные размеры
     h = min(h1, h2)
     w = min(w1, w2)
     
-    # Изменяем размер изображений
     img1_resized = cv2.resize(image1, (w, h))
     img2_resized = cv2.resize(image2, (w, h))
     
-    # Смешиваем изображения
     blended = cv2.addWeighted(img1_resized, alpha, img2_resized, 1 - alpha, 0)
     return blended
 
 def generate_color_distribution(image, title="Color Distribution"):
-    """
-    Генерирует график распределения цветов
-    """
+    """Генерирует график распределения цветов"""
     plt.figure(figsize=(10, 6))
     
-    if len(image.shape) == 3:  # Цветное изображение
+    if len(image.shape) == 3:
         colors = ('b', 'g', 'r')
         channel_names = ('Blue', 'Green', 'Red')
         for i, (color, name) in enumerate(zip(colors, channel_names)):
             hist = cv2.calcHist([image], [i], None, [256], [0, 256])
             plt.plot(hist, color=color, label=f'{name} Channel', alpha=0.7)
-    else:  # Черно-белое изображение
+    else:
         hist = cv2.calcHist([image], [0], None, [256], [0, 256])
         plt.plot(hist, color='gray', label='Grayscale', alpha=0.7)
     
@@ -93,7 +74,6 @@ def generate_color_distribution(image, title="Color Distribution"):
     plt.legend()
     plt.grid(True, alpha=0.3)
     
-    # Сохраняем в буфер
     buf = BytesIO()
     plt.savefig(buf, format='png', dpi=100, bbox_inches='tight')
     buf.seek(0)
@@ -106,22 +86,11 @@ def generate_color_distribution(image, title="Color Distribution"):
 def index():
     return render_template('simple.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
-@app.route('/advanced')
-def advanced():
-    return render_template('net.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
-
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
-    # === ОТЛАДОЧНАЯ ИНФОРМАЦИЯ ===
-    print("=== DEBUG ===")
-    print(f"Form keys: {list(request.form.keys())}")
-    print(f"Files keys: {list(request.files.keys())}")
-    print(f"reCAPTCHA response present: {'g-recaptcha-response' in request.form}")
-    
+    # Проверка reCAPTCHA
     recaptcha_response = request.form.get('g-recaptcha-response')
-    print(f"reCAPTCHA response length: {len(recaptcha_response) if recaptcha_response else 0}")
     
-    # === ПРОВЕРКА reCAPTCHA ===
     if not recaptcha_response:
         return jsonify({
             'success': False,
@@ -134,9 +103,7 @@ def blend_images_route():
             'error': 'reCAPTCHA verification failed. Please try again.'
         }), 400
     
-    print("✅ reCAPTCHA passed, processing images...")
-        
-    # Проверяем файлы
+    # Проверка файлов
     if 'file1' not in request.files or 'file2' not in request.files:
         return jsonify({
             'success': False,
@@ -153,9 +120,8 @@ def blend_images_route():
         }), 400
     
     try:
-        # Получаем параметр смешивания
         blend_alpha = float(request.form.get('blend_alpha', 0.5))
-        blend_alpha = max(0.0, min(1.0, blend_alpha))  # Ограничиваем от 0 до 1
+        blend_alpha = max(0.0, min(1.0, blend_alpha))
     except ValueError:
         return jsonify({
             'success': False,
@@ -179,7 +145,7 @@ def blend_images_route():
         # Смешиваем изображения
         blended_image = blend_images(image1, image2, blend_alpha)
         
-        # Конвертируем изображения в base64
+        # Конвертируем в base64
         def image_to_base64(img):
             _, buffer = cv2.imencode('.png', img)
             return base64.b64encode(buffer).decode('utf-8')
@@ -188,7 +154,7 @@ def blend_images_route():
         original2_base64 = image_to_base64(image2)
         blended_base64 = image_to_base64(blended_image)
         
-        # Генерируем графики распределения цветов
+        # Генерируем графики
         color_dist1 = generate_color_distribution(image1, "Image 1 Color Distribution")
         color_dist2 = generate_color_distribution(image2, "Image 2 Color Distribution")
         color_dist_blended = generate_color_distribution(blended_image, "Blended Image Color Distribution")
