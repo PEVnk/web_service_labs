@@ -457,12 +457,12 @@
             const file1 = fileInput1.files[0];
             const file2 = fileInput2.files[0];
             const alpha = blendAlpha.value;
-            const recaptchaResponse = grecaptcha.getResponse();
-
-            if (!recaptchaResponse) {
-                showError('Please complete the reCAPTCHA verification.');
-                return;
-            }
+           // УБЕРИТЕ ЭТУ ПРОВЕРКУ
+    // const recaptchaResponse = grecaptcha.getResponse();
+    // if (!recaptchaResponse) {
+    //     showError('Please complete the reCAPTCHA verification.');
+    //     return;
+    // }
 
             // Показываем загрузку
             loading.style.display = 'block';
@@ -475,7 +475,8 @@
             formData.append('file1', file1);
             formData.append('file2', file2);
             formData.append('blend_alpha', alpha);
-            formData.append('g-recaptcha-response', recaptchaResponse);
+           // УБЕРИТЕ ЭТУ СТРОКУ
+    // formData.append('g-recaptcha-response', recaptchaResponse);
 
             try {
                 const response = await fetch('/blend', {
@@ -491,11 +492,11 @@
                 } else {
                     showError(data.error || 'An error occurred while processing images.');
                     // Сбрасываем reCAPTCHA
-                    grecaptcha.reset();
+                   // grecaptcha.reset();
                 }
             } catch (error) {
                 showError('Network error: ' + error.message);
-                grecaptcha.reset();
+                //grecaptcha.reset();
             } finally {
                 loading.style.display = 'none';
                 processBtn.disabled = false;
