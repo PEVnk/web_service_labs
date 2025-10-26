@@ -1,6 +1,5 @@
-import os
 import matplotlib
-matplotlib.use('Agg')  # Используем бэкенд без GUI
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from flask import Flask, render_template, request, jsonify, session
@@ -10,6 +9,7 @@ import os
 from io import BytesIO
 import base64
 import requests
+import random
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -20,17 +20,10 @@ app.secret_key = 'your-secret-key-here'
 RECAPTCHA_SECRET_KEY = '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe'
 RECAPTCHA_SITE_KEY = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI'
 
-# Конфигурация для тестовой среды
-if os.environ.get('TRAVIS') or os.environ.get('CI'):
-    print("🔧 Running in CI environment")
-    # Отключаем reCAPTCHA проверку в тестовой среде
-    def verify_recaptcha(recaptcha_response):
-        print("🔧 CI MODE: reCAPTCHA check disabled")
-        return True
-else:
-    
-    def verify_recaptcha(recaptcha_response):
-    """Проверяет Google reCAPTCHA ответ"""
+def verify_recaptcha(recaptcha_response):
+    """
+    Проверяет Google reCAPTCHA ответ
+    """
     if not recaptcha_response:
         return False
         
@@ -51,7 +44,9 @@ else:
         return False
 
 def blend_images(image1, image2, alpha):
-    """Смешивает два изображения с заданным коэффициентом"""
+    """
+    Смешивает два изображения с заданным коэффициентом
+    """
     h1, w1 = image1.shape[:2]
     h2, w2 = image2.shape[:2]
     
@@ -65,7 +60,9 @@ def blend_images(image1, image2, alpha):
     return blended
 
 def generate_color_distribution(image, title="Color Distribution"):
-    """Генерирует график распределения цветов"""
+    """
+    Генерирует график распределения цветов
+    """
     plt.figure(figsize=(10, 6))
     
     if len(image.shape) == 3:
@@ -95,6 +92,10 @@ def generate_color_distribution(image, title="Color Distribution"):
 @app.route('/')
 def index():
     return render_template('simple.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+
+@app.route('/advanced')
+def advanced():
+    return render_template('net.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
 
 @app.route('/blend', methods=['POST'])
 def blend_images_route():
@@ -189,6 +190,9 @@ def blend_images_route():
             'success': False,
             'error': f'Error processing images: {str(e)}'
         }), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
