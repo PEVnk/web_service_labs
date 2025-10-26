@@ -19,10 +19,10 @@ jobs:
       with:
         python-version: "3.10"
     
-    - name: Install system dependencies
+    - name: Install system dependencies (headless)
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgl1-mesa-glx libgtk2.0-0 libsm6 libxext6 libxrender-dev
+        sudo apt-get install -y libglib2.0-0 libsm6 libxext6 libxrender-dev
     
     - name: Install Python dependencies
       run: |
@@ -31,20 +31,7 @@ jobs:
         pip install -r requirements.txt
         pip install pytest
     
-    - name: Debug info
-      run: |
-        cd lab1_task/flaskapp
-        echo "=== Project Structure ==="
-        ls -la
-        echo "=== Tests Structure ==="
-        ls -la tests/ || echo "No tests directory"
-    
     - name: Run tests
       run: |
         cd lab1_task/flaskapp
         python -m pytest tests/ -v
-    
-    - name: Verify basic functionality
-      run: |
-        cd lab1_task/flaskapp
-        python -c "import sys; sys.path.insert(0, '.'); from some_app import app; print('✅ Flask app imported successfully')"
